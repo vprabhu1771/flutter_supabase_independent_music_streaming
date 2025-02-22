@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/Brand.dart';
 import '../screens/song/SongFilterByBrandScreen.dart';
+import '../widgets/CustomDrawer.dart';
 
 class BrandScreen extends StatefulWidget {
   final String title;
@@ -28,6 +29,7 @@ class _BrandScreenState extends State<BrandScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: CustomDrawer(parentContext: context),
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
