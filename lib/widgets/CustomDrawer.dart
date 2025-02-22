@@ -62,6 +62,19 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.pushNamed(context, '/settings');
               },
             ),
+            ListTile(
+              leading: Icon(Icons.contacts),
+              title: Text('Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  parentContext,
+                  MaterialPageRoute(
+                    builder: (context) => ProfileScreen(title: 'Profile'),
+                  ),
+                );
+              },
+            ),
             Divider(),
             ListTile(
               leading: Icon(Icons.exit_to_app, color: Colors.red),
