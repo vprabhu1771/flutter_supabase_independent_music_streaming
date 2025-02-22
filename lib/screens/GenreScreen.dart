@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/Genre.dart';
 import '../screens/song/SongFilterByGenreScreen.dart';
+import '../widgets/CustomDrawer.dart';
 
 class GenreScreen extends StatefulWidget {
   final String title;
@@ -27,6 +28,7 @@ class _GenreScreenState extends State<GenreScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: CustomDrawer(parentContext: context),
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
