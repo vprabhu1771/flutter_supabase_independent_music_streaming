@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../models/Genre.dart';
 import '../../models/Song.dart';
+import 'MusicPlayerScreen.dart';
 
 class SongFilterByGenreScreen extends StatefulWidget {
   final String title;
@@ -75,6 +76,11 @@ class _SongFilterByGenreScreenState extends State<SongFilterByGenreScreen> {
                 return ListTile(
                   title: Text(song.name),
                   onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => MusicPlayerScreen(song: song),
+                      ),
+                    );
                     // Example action: Pass song ID to a cart or another screen.
                     Map<String, dynamic> cart = {
                       'product_id': song.id,
