@@ -1,6 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/Playlist.dart';
 import '../../models/Song.dart';
 
 class MusicPlayerScreen extends StatefulWidget {
@@ -15,16 +17,20 @@ class MusicPlayerScreen extends StatefulWidget {
 
 class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
+  final SupabaseClient supabase = Supabase.instance.client;
+
   final player = AudioPlayer();
   bool isPlaying =false;
   Duration currentPosition = Duration.zero;
   Duration totalDuration = Duration.zero;
 
+  String? userId;
+
   @override
   void initState() {
 
     super.initState();
-    super.initState();
+    userId = supabase.auth.currentUser?.id;
 
     // Listen to player state changes
 
@@ -76,12 +82,85 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
     return "$minutes:$seconds";
   }
 
+  /// Fetch playlists for the current user
+  Future<List<Playlist>> fetchUserPlaylists() async {
+    final response = await supabase
+        .from('playlists')
+        .select()
+        .eq('user_id', userId as Object)
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((playlist) => Playlist.fromJson(playlist))
+        .toList();
+  }
+
+  /// Show dialog to select playlist and add the song
+  Future<void> showAddToPlaylistDialog() async {
+    final playlists = await fetchUserPlaylists();
+
+    if (playlists.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No playlists available. Create one first.')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add to Playlist'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: playlists.length,
+            itemBuilder: (context, index) {
+              final playlist = playlists[index];
+              return ListTile(
+                title: Text(playlist.name),
+                onTap: () => addSongToPlaylist(playlist.id, playlist.name),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Add song to selected playlist
+  Future<void> addSongToPlaylist(int playlistId, String playlistName) async {
+    final response = await supabase.from('playlist_song').insert({
+      'playlist_id': playlistId,
+      'song_id': widget.song.id,
+    });
+
+    Navigator.of(context).pop(); // Close dialog
+
+    if (response != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${response.error!.message}')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Added to "$playlistName" successfully!')),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.song.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.playlist_add),
+            onPressed: showAddToPlaylistDialog,
+            tooltip: 'Add to Playlist',
+          ),
+        ],
       ),
       body: Center(
         child: Column(
