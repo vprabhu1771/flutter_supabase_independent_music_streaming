@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_supabase_independent_music_streaming/screens/playlist/PlaylistDetailScreen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../models/Playlist.dart';
-import '../widgets/CustomDrawer.dart';
+import '../../models/Playlist.dart';
+import '../../widgets/CustomDrawer.dart';
 
 class PlaylistScreen extends StatefulWidget {
   final String title;
@@ -249,7 +250,16 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                   },
                   child: ListTile(
                     title: Text(playlist.name),
-                    onTap: () => _editPlaylistName(playlist),
+                    onTap: ()  {
+
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => PlaylistDetailScreen(title: playlist.name),
+                        ),
+                      );
+
+                    },
+                    onLongPress: () => _editPlaylistName(playlist),
                   ),
                 );
               },
