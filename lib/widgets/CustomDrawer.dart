@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/BrandScreen.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/GenreScreen.dart';
+import 'package:flutter_supabase_independent_music_streaming/screens/SettingScreen.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/song/SongScreen.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -108,7 +109,12 @@ class CustomDrawer extends StatelessWidget {
               title: Text('Settings'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/settings');
+                Navigator.push(
+                  parentContext,
+                  MaterialPageRoute(
+                    builder: (context) => SettingScreen(title: 'Settings'),
+                  ),
+                );
               },
             ),
             ListTile(
