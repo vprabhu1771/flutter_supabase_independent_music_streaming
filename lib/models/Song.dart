@@ -13,11 +13,16 @@ class Song {
   });
 
   Song.fromJson(Map<String, dynamic> json)
-      :
-
-        id = json['id'],
+      : id = json['id'],
         name =json['name'],
         image_path=json['image_path'],
         song_path=json['song_path'];
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'image_path': image_path,
+    'song_path': song_path,
+  };
 
 }
