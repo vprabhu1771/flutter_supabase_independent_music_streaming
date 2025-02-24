@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/BrandScreen.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/GenreScreen.dart';
+import 'package:flutter_supabase_independent_music_streaming/screens/song/SongScreen.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -49,6 +50,19 @@ class CustomDrawer extends StatelessWidget {
               currentAccountPicture: CircleAvatar(
                 child: Icon(Icons.person, size: 40),
               ),
+            ),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('Songs'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  parentContext,
+                  MaterialPageRoute(
+                    builder: (context) => SongScreen(title: 'Songs'),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: Icon(Icons.home),
