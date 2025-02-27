@@ -3,6 +3,7 @@ import 'package:flutter_supabase_independent_music_streaming/screens/BrandScreen
 import 'package:flutter_supabase_independent_music_streaming/screens/GenreScreen.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/SettingScreen.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/UploadScreen.dart';
+import 'package:flutter_supabase_independent_music_streaming/screens/song/MySongScreen.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/song/SongScreen.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -62,6 +63,19 @@ class CustomDrawer extends StatelessWidget {
                   parentContext,
                   MaterialPageRoute(
                     builder: (context) => SongScreen(title: 'Songs'),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('My Songs'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  parentContext,
+                  MaterialPageRoute(
+                    builder: (context) => MySongScreen(title: 'My Songs'),
                   ),
                 );
               },
