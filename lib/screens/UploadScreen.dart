@@ -19,6 +19,18 @@ class _UploadScreenState extends State<UploadScreen> {
   bool isUploading = false;
   String? uploadedFileUrl;
 
+  String? userId;
+
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      userId = supabase.auth.currentUser!.id;
+    });
+
+  }
+
   Future<void> uploadSong() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -57,6 +69,7 @@ class _UploadScreenState extends State<UploadScreen> {
         'song_path': publicUrl,
         'genre_id': 6,
         'brand_id': 1,
+        'user_id': userId,
         'created_at': DateTime.now().toIso8601String(),
       });
 
