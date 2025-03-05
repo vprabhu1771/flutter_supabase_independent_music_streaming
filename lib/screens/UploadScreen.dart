@@ -87,6 +87,7 @@ class _UploadScreenState extends State<UploadScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Upload Failed: $e')),
       );
+      print('Upload Failed: $e');
     }
   }
 
