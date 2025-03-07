@@ -1,3 +1,4 @@
+```
 CREATE TABLE playlist_songs (
     id SERIAL PRIMARY KEY,
     playlist_id INT NOT NULL,
@@ -7,3 +8,4 @@ CREATE TABLE playlist_songs (
     FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE,
     UNIQUE (playlist_id, song_id)  -- Prevent duplicate song entries in the same playlist
 )
+```
