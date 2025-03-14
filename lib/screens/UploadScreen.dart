@@ -30,6 +30,7 @@ class _UploadScreenState extends State<UploadScreen> {
     });
 
   }
+  
 
   Future<void> uploadSong() async {
     if (!_formKey.currentState!.validate()) return;
@@ -43,7 +44,8 @@ class _UploadScreenState extends State<UploadScreen> {
       if (result == null) return; // User canceled file picker
 
       final file = File(result.files.single.path!);
-      final fileName = result.files.single.name;
+      // final fileName = result.files.single.name;
+      final fileName = DateTime.now().millisecondsSinceEpoch.toString();
       final songName = _songNameController.text.trim();
 
       setState(() => isUploading = true);
