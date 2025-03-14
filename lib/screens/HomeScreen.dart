@@ -20,10 +20,10 @@ class _HomeScreenState extends State<HomeScreen> {
   int _current = 0;
 
   final List<String> imgList = [
-    'https://xxllfyzeciydpjwwyeef.supabase.co/storage/v1/object/public/assets/weight_bridge_record_control_carousel/w2.jpg',
-    'https://xxllfyzeciydpjwwyeef.supabase.co/storage/v1/object/public/assets/weight_bridge_record_control_carousel/w33.jpg',
-    'https://xxllfyzeciydpjwwyeef.supabase.co/storage/v1/object/public/assets/weight_bridge_record_control_carousel/w34.jpg',
-    'https://xxllfyzeciydpjwwyeef.supabase.co/storage/v1/object/public/assets/weight_bridge_record_control_carousel/w35.jpg'
+    'https://xxllfyzeciydpjwwyeef.supabase.co/storage/v1/object/public/assets/song_carousel/img1.jpg',
+    'https://xxllfyzeciydpjwwyeef.supabase.co/storage/v1/object/public/assets/song_carousel/img2.png',
+    'https://xxllfyzeciydpjwwyeef.supabase.co/storage/v1/object/public/assets/song_carousel/img3.jpg',
+    'https://xxllfyzeciydpjwwyeef.supabase.co/storage/v1/object/public/assets/song_carousel/img4.jpg'
   ];
 
   List<Widget> get imageSliders => imgList
