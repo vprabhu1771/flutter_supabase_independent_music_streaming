@@ -2,10 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/Brand.dart';
+import '../models/Genre.dart';
 
 class UploadScreen extends StatefulWidget {
   final String title;
-
   const UploadScreen({Key? key, required this.title}) : super(key: key);
 
   @override
@@ -18,22 +19,42 @@ class _UploadScreenState extends State<UploadScreen> {
   final TextEditingController _songNameController = TextEditingController();
   bool isUploading = false;
   String? uploadedFileUrl;
-
   String? userId;
+  List<Genre> genres = [];
+  List<Brand> brands = [];
+  Genre? selectedGenre;
+  Brand? selectedBrand;
 
   @override
   void initState() {
     super.initState();
-
-    setState(() {
-      userId = supabase.auth.currentUser!.id;
-    });
-
+    userId = supabase.auth.currentUser?.id;
+    fetchGenres();
+    fetchBrands();
   }
-  
+
+  Future<void> fetchGenres() async {
+    final data = await supabase.from('genres').select();
+    setState(() {
+      genres = data.map<Genre>((json) => Genre.fromJson(json)).toList();
+    });
+  }
+
+  Future<void> fetchBrands() async {
+    final data = await supabase.from('brands').select();
+    setState(() {
+      brands = data.map<Brand>((json) => Brand.fromJson(json)).toList();
+    });
+  }
 
   Future<void> uploadSong() async {
     if (!_formKey.currentState!.validate()) return;
+    if (selectedGenre == null || selectedBrand == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select both genre and brand.')),
+      );
+      return;
+    }
 
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -41,18 +62,15 @@ class _UploadScreenState extends State<UploadScreen> {
         allowedExtensions: ['mp3', 'wav', 'aac'],
       );
 
-      if (result == null) return; // User canceled file picker
+      if (result == null) return;
 
       final file = File(result.files.single.path!);
-      // final fileName = result.files.single.name;
-      final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      final fileName = "${DateTime.now().millisecondsSinceEpoch}.mp3";
       final songName = _songNameController.text.trim();
 
       setState(() => isUploading = true);
 
-      // Upload the file to Supabase Storage
       final response = await supabase.storage.from('assets').upload('songs/$fileName', file);
-
       if (response == null) {
         throw response;
       }
@@ -64,39 +82,31 @@ class _UploadScreenState extends State<UploadScreen> {
         uploadedFileUrl = publicUrl;
       });
 
-      // Insert song details into the 'songs' table
-      final insertResponse = await supabase.from('songs').insert({
+      await supabase.from('songs').insert({
         'name': songName,
         'image_path': publicUrl,
         'song_path': publicUrl,
-        'genre_id': 6,
-        'brand_id': 1,
+        'genre_id': selectedGenre!.id,
+        'brand_id': selectedBrand!.id,
         'user_id': userId,
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      if (insertResponse != null) {
-        throw insertResponse!;
-      }
-
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Song uploaded and saved successfully!')),
+        const SnackBar(content: Text('Song uploaded successfully!')),
       );
 
-      _songNameController.clear(); // Clear input field after successful upload
+      _songNameController.clear();
+      setState(() {
+        selectedGenre = null;
+        selectedBrand = null;
+      });
     } catch (e) {
       setState(() => isUploading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Upload Failed: $e')),
       );
-      print('Upload Failed: $e');
     }
-  }
-
-  @override
-  void dispose() {
-    _songNameController.dispose();
-    super.dispose();
   }
 
   @override
@@ -108,7 +118,6 @@ class _UploadScreenState extends State<UploadScreen> {
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextFormField(
                 controller: _songNameController,
@@ -118,14 +127,43 @@ class _UploadScreenState extends State<UploadScreen> {
                 ),
                 validator: (value) => value == null || value.isEmpty ? 'Please enter a song name' : null,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<Genre>(
+                value: selectedGenre,
+                items: genres.map((Genre genre) {
+                  return DropdownMenuItem<Genre>(
+                    value: genre,
+                    child: Text(genre.name),
+                  );
+                }).toList(),
+                onChanged: (value) => setState(() => selectedGenre = value),
+                decoration: const InputDecoration(
+                  labelText: 'Select Genre',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<Brand>(
+                value: selectedBrand,
+                items: brands.map((Brand brand) {
+                  return DropdownMenuItem<Brand>(
+                    value: brand,
+                    child: Text(brand.name),
+                  );
+                }).toList(),
+                onChanged: (value) => setState(() => selectedBrand = value),
+                decoration: const InputDecoration(
+                  labelText: 'Select Brand',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
               ElevatedButton.icon(
                 icon: const Icon(Icons.upload_file),
                 label: const Text('Pick and Upload Song'),
                 onPressed: isUploading ? null : uploadSong,
               ),
-              const SizedBox(height: 20),
-              if (isUploading) const CircularProgressIndicator(),
+              if (isUploading) const Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()),
               if (uploadedFileUrl != null) ...[
                 const SizedBox(height: 20),
                 const Text('File Uploaded!'),
