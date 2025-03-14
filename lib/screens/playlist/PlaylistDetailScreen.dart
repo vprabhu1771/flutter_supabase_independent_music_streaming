@@ -21,12 +21,14 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
   Stream<List<Playlist>> playlistStream() {
     return supabase
         .from('playlists')
-        .select('*, playlist_song(*, songs(*))') // Fetch playlists with their songs
+        .select('*, playlist_songs(*, songs(*))') // Fetch playlists with their songs
         .asStream()
         .map((data) {
+      print('Raw data from Supabase: $data'); // Print raw response
+
       return (data as List<dynamic>).map((row) {
-        final songs = (row['playlist_song'] as List<dynamic>?)
-            ?.map((ps) => Song.fromJson(ps['songs']))
+        final songs = (row['playlist_songs'] as List<dynamic>?)
+            ?.map((ps) => Song.fromJson(ps['songs'])) // Store the parsed Song object
             .toList() ??
             [];
 
@@ -38,6 +40,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
       }).toList();
     });
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../widgets/CustomDrawer.dart';
 
 class HomeScreen extends StatefulWidget {
-
   final String title;
 
   const HomeScreen({super.key, required this.title});
@@ -14,9 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-  final CarouselSliderController  _controller = CarouselSliderController ();
-
+  final CarouselSliderController _controller = CarouselSliderController();
   int _current = 0;
 
   final List<String> imgList = [
@@ -38,109 +35,105 @@ class _HomeScreenState extends State<HomeScreen> {
         const Icon(Icons.broken_image, size: 100),
       ),
     ),
-  ).toList();
+  )
+      .toList();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        drawer: CustomDrawer(parentContext: context),
-        body: Column(
-          children: [
-
-            // 🎠 Carousel Slider
-            CarouselSlider(
-              items: imageSliders,
-              carouselController: _controller,
-              options: CarouselOptions(
-                autoPlay: true,
-                enlargeCenterPage: true,
-                aspectRatio: 2.0,
-                onPageChanged: (index, reason) {
-                  // setState(() {
-                  //   _current = index;
-                  // });
-
-                  _current = index; // Avoid calling setState here
-                },
-              ),
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      drawer: CustomDrawer(parentContext: context),
+      body: Column(
+        children: [
+          // 🎠 Carousel Slider
+          CarouselSlider(
+            items: imageSliders,
+            carouselController: _controller,
+            options: CarouselOptions(
+              autoPlay: true,
+              enlargeCenterPage: true,
+              aspectRatio: 2.0,
+              onPageChanged: (index, reason) {
+                setState(() {
+                  _current = index;
+                });
+              },
             ),
+          ),
 
-            // 🔘 Carousel Dots Indicator
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: imgList.asMap().entries.map((entry) {
-                return GestureDetector(
-                  onTap: () => _controller.animateToPage(entry.key),
-                  child: Container(
-                    width: 10.0,
-                    height: 10.0,
-                    margin:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: (_current == entry.key
-                          ? Colors.blueAccent
-                          : Colors.grey)
-                          .withOpacity(0.9),
-                    ),
+          // 🔘 Carousel Dots Indicator
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: imgList.asMap().entries.map((entry) {
+              return GestureDetector(
+                onTap: () => _controller.animateToPage(entry.key),
+                child: Container(
+                  width: 10.0,
+                  height: 10.0,
+                  margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: (_current == entry.key
+                        ? Colors.blueAccent
+                        : Colors.grey)
+                        .withOpacity(0.9),
                   ),
-                );
-              }).toList(),
+                ),
+              );
+            }).toList(),
+          ),
+
+          SizedBox(height: 10),
+
+          Text(
+            'Welcome to IndieStream! 🎶',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.blueAccent,
             ),
+            textAlign: TextAlign.center,
+          ),
 
-            SizedBox(height: 10),
+          SizedBox(height: 10),
 
-            Text(
-              'Welcome to the Weight Bridge Record Control',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
-              ),
-              textAlign: TextAlign.center,
+          Text(
+            'Discover, stream, and support independent artists from around the world.',
+            style: TextStyle(fontSize: 16, color: Colors.black87),
+            textAlign: TextAlign.center,
+          ),
+
+          SizedBox(height: 10),
+
+          Text(
+            'Explore new music, create playlists, and connect with a community that loves indie music as much as you do.',
+            style: TextStyle(fontSize: 16, color: Colors.black87),
+            textAlign: TextAlign.center,
+          ),
+
+          SizedBox(height: 10),
+
+          Text(
+            'Unlimited Streaming, Ad-Free!',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.redAccent,
             ),
+            textAlign: TextAlign.center,
+          ),
 
-            SizedBox(height: 10),
+          SizedBox(height: 10),
 
-            Text(
-              'Manage your weight bridge operations seamlessly with our user-friendly interface.',
-              style: TextStyle(fontSize: 16, color: Colors.black87),
-              textAlign: TextAlign.center,
-            ),
-
-            SizedBox(height: 10),
-
-            Text(
-              'Use the navigation bar above to explore the system.',
-              style: TextStyle(fontSize: 16, color: Colors.black87),
-              textAlign: TextAlign.center,
-            ),
-
-            SizedBox(height: 10),
-
-            Text(
-              '24/7 Service Available!',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.redAccent,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            SizedBox(height: 10),
-
-            Text(
-              'We\'re here to assist you anytime, day or night. Your operations matter to us!',
-              style: TextStyle(fontSize: 16, color: Colors.black87),
-              textAlign: TextAlign.center,
-            ),
-
-          ],
-        )
+          Text(
+            'Enjoy high-quality streaming with zero interruptions. IndieStream is designed to put artists first.',
+            style: TextStyle(fontSize: 16, color: Colors.black87),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

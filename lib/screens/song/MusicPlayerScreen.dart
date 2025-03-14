@@ -130,10 +130,12 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
 
   /// Add song to selected playlist
   Future<void> addSongToPlaylist(int playlistId, String playlistName) async {
-    final response = await supabase.from('playlist_song').insert({
+    final response = await supabase.from('playlist_songs').insert({
       'playlist_id': playlistId,
       'song_id': widget.song.id,
     });
+
+    print(response.toString());
 
     Navigator.of(context).pop(); // Close dialog
 
