@@ -2,35 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_supabase_independent_music_streaming/widgets/CustomDrawer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../models/Genre.dart';
 import '../../models/Song.dart';
 import 'MusicPlayerScreen.dart';
 
 class SongScreen extends StatefulWidget {
   final String title;
 
-  const SongScreen({
-    super.key,
-    required this.title
-  });
+  const SongScreen({super.key, required this.title});
 
   @override
-  State<SongScreen> createState() =>
-      _SongScreenState();
+  State<SongScreen> createState() => _SongScreenState();
 }
 
 class _SongScreenState extends State<SongScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
 
-  /// Returns a stream of songs filtered by the selected genre.
-  Stream<List<Song>> songStream() {
+  /// Fetches the list of songs along with user details.
+  Future<List<Song>> fetchSongs() async {
+    final response = await supabase.from('songs').select('*, artist:users(*)');
 
-    // print(genreId);
-    return supabase
-        .from('songs')
-        .stream(primaryKey: ['id'])
-        // .eq('genre_id', genreId)
-        .map((data) => data.map((song) => Song.fromJson(song)).toList());
+    print("Raw Data from Supabase: $response");
+
+    final songs = response.map((song) => Song.fromJson(song)).toList();
+
+    print("Parsed Songs List: $songs");
+
+    return songs;
   }
 
   @override
@@ -43,48 +40,46 @@ class _SongScreenState extends State<SongScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              setState(() {}); // Refresh the StreamBuilder by rebuilding the widget.
+              setState(() {}); // Triggers UI rebuild
             },
           ),
         ],
       ),
-      body: StreamBuilder<List<Song>>(
-        stream: songStream(),
+      body: FutureBuilder<List<Song>>(
+        future: fetchSongs(), // Calls fetchSongs() only once
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text('Error loading songs: ${snapshot.error}'),
+            );
           }
 
           final songs = snapshot.data ?? [];
 
           if (songs.isEmpty) {
-            return const Center(child: Text('No songs available for this genre.'));
+            return const Center(child: Text('No songs available.'));
           }
 
           return RefreshIndicator(
             onRefresh: () async {
-              setState(() {}); // Refresh the data
+              setState(() {}); // Triggers UI rebuild
             },
             child: ListView.builder(
               itemCount: songs.length,
               itemBuilder: (context, index) {
                 final song = songs[index];
                 return ListTile(
-                  title: Text(song.name),
+                  title: Text("${song.name} - ${song.artist?.name}" ),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => MusicPlayerScreen(song: song),
                       ),
                     );
-                    // Example action: Pass song ID to a cart or another screen.
-                    Map<String, dynamic> cart = {
-                      'product_id': song.id,
-                    };
                     print('Selected song: ${song.name} with ID: ${song.id}');
                   },
                 );
