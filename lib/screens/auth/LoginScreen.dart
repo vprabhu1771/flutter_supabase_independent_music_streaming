@@ -112,10 +112,10 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             // Logo at the Top
-            Image.asset(
-              'assets/splash_logo.jpg', // Make sure to add your logo in assets folder
-              height: 100,
-            ),
+            // Image.asset(
+            //   'assets/splash_logo.jpg', // Make sure to add your logo in assets folder
+            //   height: 100,
+            // ),
             SizedBox(height: 20),
 
             Text(
