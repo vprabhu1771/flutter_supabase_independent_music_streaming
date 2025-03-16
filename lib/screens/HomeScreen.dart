@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height: 10),
 
           Text(
-            'Welcome to IndieStream! 🎶',
+            'Welcome to Melodify! 🎶',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -128,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height: 10),
 
           Text(
-            'Enjoy high-quality streaming with zero interruptions. IndieStream is designed to put artists first.',
+            'Enjoy high-quality streaming with zero interruptions. Melodify is designed to put artists first.',
             style: TextStyle(fontSize: 16, color: Colors.black87),
             textAlign: TextAlign.center,
           ),
