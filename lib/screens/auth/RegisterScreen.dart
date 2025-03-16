@@ -28,6 +28,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
   bool _obscureText = true; // To toggle password visibility
 
+  String selectedRole = 'customer'; // Default role
+  List<String> roles = ['admin', 'freelancer', 'customer'];
+
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +46,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await supabase.auth.signUp(
+      final response = await supabase.auth.signUp(
         email: emailController.text,
         password: passwordController.text,
         data: {
@@ -51,13 +55,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
       );
 
-      Fluttertoast.showToast(msg: "Registration Successful!");
-      signIn();
+      final userId = response.user?.id;
+
+      if (userId != null) {
+        await _assignRole(userId);
+        Fluttertoast.showToast(msg: "Registration Successful!");
+        signIn();
+      }
+      // signIn();
     } catch (error) {
       Fluttertoast.showToast(msg: "Error: ${error.toString()}");
       print("Error: ${error.toString()}");
     }
     setState(() => _isLoading = false);
+  }
+
+  Future<void> _assignRole(String userId) async {
+    try {
+      // Get the role ID based on selected role name
+      final roleQuery = await supabase
+          .from('roles')
+          .select('id')
+          .eq('name', selectedRole)
+          .single();
+
+      final roleId = roleQuery['id'];
+
+      // Assign the role to the user
+      await supabase.from('user_roles').insert({'user_id': userId, 'role_id': roleId});
+    } catch (error) {
+      print("Role assignment failed: $error");
+    }
   }
 
   Future<void> signIn() async {
