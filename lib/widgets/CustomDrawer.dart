@@ -75,7 +75,10 @@ class CustomDrawer extends StatelessWidget {
               UserAccountsDrawerHeader(
                 accountName: Text(user?.userMetadata?['name'] ?? "Guest"),
                 accountEmail: Text(user?.email ?? "No Email"),
-                currentAccountPicture: CircleAvatar(child: Icon(Icons.person, size: 40)),
+                currentAccountPicture: CircleAvatar(
+                    child: Icon(Icons.person, size: 40)
+                  // backgroundImage: NetworkImage(user?.userMetadata?['image_path'] ?? 'https://gravatar.com/avatar/${user!.email}'),
+                ),
                 decoration: BoxDecoration(
                   color: theme.primaryColor, // Themed background color
                 ),
@@ -104,7 +107,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.star),
+                  leading: Icon(Icons.music_note),
                   title: Text('Song Management'),
                   onTap: () {
                     Navigator.pop(context);
@@ -112,7 +115,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.home),
+                  leading: Icon(Icons.people),
                   title: Text('Aritst Management'),
                   onTap: () {
                     Navigator.pop(context);
@@ -144,7 +147,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.monetization_on_outlined),
+                  leading: Icon(Icons.library_music),
                   title: Text('Songs'),
                   onTap: () {
                     Navigator.pop(context);
@@ -157,7 +160,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.monetization_on_outlined),
+                  leading: Icon(Icons.headset),
                   title: Text('My Songs'),
                   onTap: () {
                     Navigator.pop(context);
@@ -170,7 +173,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.monetization_on_outlined),
+                  leading: Icon(Icons.cloud_upload),
                   title: Text('Song Upload'),
                   onTap: () {
                     Navigator.pop(context);
@@ -183,7 +186,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.monetization_on_outlined),
+                  leading: Icon(Icons.category),
                   title: Text('Genre'),
                   onTap: () {
                     Navigator.pop(context);
@@ -196,7 +199,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.monetization_on_outlined),
+                  leading: Icon(Icons.store),
                   title: Text('Brand'),
                   onTap: () {
                     Navigator.pop(context);
@@ -209,7 +212,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.monetization_on_outlined),
+                  leading: Icon(Icons.queue_music),
                   title: Text('Playlist'),
                   onTap: () {
                     Navigator.pop(context);
@@ -222,7 +225,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.contacts),
+                  leading: Icon(Icons.account_circle),
                   title: Text('Profile'),
                   onTap: () {
                     Navigator.pop(context);
