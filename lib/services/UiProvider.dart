@@ -23,9 +23,13 @@ class UiProvider extends ChangeNotifier{
   );
 
   final blueTheme = ThemeData(
-    primaryColor: Color(0x0067A1), // Hex #2196F3 (Blue),
+    primaryColor: Color(0xFF0067A1), // Hex #2196F3 (Blue),
     brightness: Brightness.light,
     primaryColorDark: Colors.pinkAccent,
+    // drawerTheme: DrawerThemeData(
+    //   backgroundColor: Color(0xFF0067A1), // Blue drawer background
+    //   scrimColor: Colors.black54, // Overlay color
+    // ),
 
     // AppBar Theme
     appBarTheme: AppBarTheme(
