@@ -73,7 +73,7 @@ class _SongScreenState extends State<SongScreen> {
               itemBuilder: (context, index) {
                 final song = songs[index];
                 return ListTile(
-                  title: Text("${song.name} - ${song.artist?.name}" ),
+                  title: Text("${song.name}" ),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
