@@ -181,6 +181,10 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                 widget.song.name
             ),
             SizedBox(height:20),
+            Text(
+                style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),
+                widget.song.artist!.name
+            ),
             Slider(
               min:0,
               max: totalDuration.inSeconds.toDouble(),
