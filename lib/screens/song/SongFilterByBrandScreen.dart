@@ -17,15 +17,39 @@ class SongFilterByBrandScreen extends StatefulWidget {
 
 class _SongFilterByBrandScreenState extends State<SongFilterByBrandScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
+  late Future<List<Song>> futureSongs;
+  String? userId;
 
-  /// Stream to fetch songs filtered by brand ID
-  Stream<List<Song>> songStreamByBrand() {
-    return supabase
+  @override
+  void initState() {
+    super.initState();
+    userId = supabase.auth.currentUser?.id;
+    futureSongs = fetchSongsByBrand(widget.brand.id);
+  }
+
+  Future<List<Song>> fetchSongsByBrand(int brandId) async {
+    if (userId == null) {
+      return [];
+    }
+
+    final response = await supabase
         .from('songs')
-        .stream(primaryKey: ['id'])
-        .eq('brand_id', widget.brand.id) // Filter by brand ID
-        .order('name', ascending: true)
-        .map((data) => data.map((song) => Song.fromJson(song)).toList());
+        .select('*, artist:users(*)')
+        .eq('brand_id', brandId);
+
+    print("Raw Data from Supabase: $response");
+
+    final songs = response.map<Song>((song) => Song.fromJson(song)).toList();
+
+    print("Parsed Songs List: $songs");
+
+    return songs;
+  }
+
+  void refreshSongs() {
+    setState(() {
+      futureSongs = fetchSongsByBrand(widget.brand.id);
+    });
   }
 
   @override
@@ -36,14 +60,12 @@ class _SongFilterByBrandScreenState extends State<SongFilterByBrandScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {}); // Refresh the StreamBuilder
-            },
+            onPressed: refreshSongs, // Correct refresh logic
           ),
         ],
       ),
-      body: StreamBuilder<List<Song>>(
-        stream: songStreamByBrand(),
+      body: FutureBuilder<List<Song>>(
+        future: futureSongs,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -61,7 +83,7 @@ class _SongFilterByBrandScreenState extends State<SongFilterByBrandScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              setState(() {}); // Trigger a refresh
+              refreshSongs();
             },
             child: ListView.builder(
               itemCount: songs.length,
