@@ -9,41 +9,39 @@ import 'MusicPlayerScreen.dart';
 class MySongScreen extends StatefulWidget {
   final String title;
 
-  const MySongScreen({
-    super.key,
-    required this.title
-  });
+  const MySongScreen({super.key, required this.title});
 
   @override
-  State<MySongScreen> createState() =>
-      _MySongScreenState();
+  State<MySongScreen> createState() => _MySongScreenState();
 }
 
 class _MySongScreenState extends State<MySongScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
-
-
+  late Future<List<Song>> futureSongs;
   String? userId;
 
   @override
   void initState() {
     super.initState();
-
-    setState(() {
-      userId = supabase.auth.currentUser!.id;
-    });
-
+    userId = supabase.auth.currentUser?.id;
+    futureSongs = fetchSongs();
   }
 
-  /// Returns a stream of songs filtered by the selected genre.
-  Stream<List<Song>> songStream() {
+  Future<List<Song>> fetchSongs() async {
+    if (userId == null) {
+      return [];
+    }
 
-    // print(genreId);
-    return supabase
-        .from('songs')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', userId as Object)
-        .map((data) => data.map((song) => Song.fromJson(song)).toList());
+    final response =
+    await supabase.from('songs').select('*, artist:users(*)').eq('user_id', userId!);
+
+    print("Raw Data from Supabase: $response");
+
+    final songs = response.map<Song>((song) => Song.fromJson(song)).toList();
+
+    print("Parsed Songs List: $songs");
+
+    return songs;
   }
 
   @override
@@ -56,13 +54,15 @@ class _MySongScreenState extends State<MySongScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              setState(() {}); // Refresh the StreamBuilder by rebuilding the widget.
+              setState(() {
+                futureSongs = fetchSongs(); // Refresh data
+              });
             },
           ),
         ],
       ),
-      body: StreamBuilder<List<Song>>(
-        stream: songStream(),
+      body: FutureBuilder<List<Song>>(
+        future: futureSongs,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -75,12 +75,14 @@ class _MySongScreenState extends State<MySongScreen> {
           final songs = snapshot.data ?? [];
 
           if (songs.isEmpty) {
-            return const Center(child: Text('No songs available for this genre.'));
+            return const Center(child: Text('No songs available.'));
           }
 
           return RefreshIndicator(
             onRefresh: () async {
-              setState(() {}); // Refresh the data
+              setState(() {
+                futureSongs = fetchSongs();
+              });
             },
             child: ListView.builder(
               itemCount: songs.length,
@@ -94,10 +96,6 @@ class _MySongScreenState extends State<MySongScreen> {
                         builder: (context) => MusicPlayerScreen(song: song),
                       ),
                     );
-                    // Example action: Pass song ID to a cart or another screen.
-                    Map<String, dynamic> cart = {
-                      'product_id': song.id,
-                    };
                     print('Selected song: ${song.name} with ID: ${song.id}');
                   },
                 );
