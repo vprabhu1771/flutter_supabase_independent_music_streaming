@@ -16,22 +16,41 @@ class SongFilterByGenreScreen extends StatefulWidget {
   });
 
   @override
-  State<SongFilterByGenreScreen> createState() =>
-      _SongFilterByGenreScreenState();
+  State<SongFilterByGenreScreen> createState() => _SongFilterByGenreScreenState();
 }
 
 class _SongFilterByGenreScreenState extends State<SongFilterByGenreScreen> {
+
   final SupabaseClient supabase = Supabase.instance.client;
 
-  /// Returns a stream of songs filtered by the selected genre.
-  Stream<List<Song>> songStreamByGenre(int genreId) {
+  late Future<List<Song>> futureSongs;
 
-    // print(genreId);
-    return supabase
+  String? userId;
+
+  @override
+  void initState() {
+    super.initState();
+    userId = supabase.auth.currentUser?.id;
+    futureSongs = fetchSongsByGenre(widget.genre.id);
+  }
+
+  Future<List<Song>> fetchSongsByGenre(int genreId) async {
+    if (userId == null) {
+      return [];
+    }
+
+    final response = await supabase
         .from('songs')
-        .stream(primaryKey: ['id'])
-        .eq('genre_id', genreId)
-        .map((data) => data.map((song) => Song.fromJson(song)).toList());
+        .select('*, artist:users(*)')
+        .eq('genre_id', genreId);
+
+    print("Raw Data from Supabase: $response");
+
+    final songs = response.map<Song>((song) => Song.fromJson(song)).toList();
+
+    print("Parsed Songs List: $songs");
+
+    return songs;
   }
 
   @override
@@ -43,13 +62,15 @@ class _SongFilterByGenreScreenState extends State<SongFilterByGenreScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              setState(() {}); // Refresh the StreamBuilder by rebuilding the widget.
+              setState(() {
+                futureSongs = fetchSongsByGenre(widget.genre.id); // Refresh data
+              });
             },
           ),
         ],
       ),
-      body: StreamBuilder<List<Song>>(
-        stream: songStreamByGenre(widget.genre.id),
+      body: FutureBuilder<List<Song>>(
+        future: futureSongs,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -67,7 +88,9 @@ class _SongFilterByGenreScreenState extends State<SongFilterByGenreScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              setState(() {}); // Refresh the data
+              setState(() {
+                futureSongs = fetchSongsByGenre(widget.genre.id);
+              });
             },
             child: ListView.builder(
               itemCount: songs.length,
@@ -81,10 +104,6 @@ class _SongFilterByGenreScreenState extends State<SongFilterByGenreScreen> {
                         builder: (context) => MusicPlayerScreen(song: song),
                       ),
                     );
-                    // Example action: Pass song ID to a cart or another screen.
-                    Map<String, dynamic> cart = {
-                      'product_id': song.id,
-                    };
                     print('Selected song: ${song.name} with ID: ${song.id}');
                   },
                 );
