@@ -90,6 +90,16 @@ class _SongFilterByBrandScreenState extends State<SongFilterByBrandScreen> {
               itemBuilder: (context, index) {
                 final song = songs[index];
                 return ListTile(
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      song.image_path,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.scaleDown,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+                    ),
+                  ),
                   title: Text(song.name),
                   trailing: IconButton(
                     icon: const Icon(Icons.play_arrow),
