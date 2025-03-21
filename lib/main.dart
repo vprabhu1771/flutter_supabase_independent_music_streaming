@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/HomeScreen.dart';
+import 'package:flutter_supabase_independent_music_streaming/screens/auth/LoginScreen.dart';
 import 'package:flutter_supabase_independent_music_streaming/services/UiProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
                 ? notifier.darkTheme // dark theme applied
                 : notifier.blueTheme, // pink theme applied when not dark
 
-            home: HomeScreen(title: 'Home'),
+            home: LoginScreen(title: 'Login'),
 
           );
         },
