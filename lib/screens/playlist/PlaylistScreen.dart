@@ -3,6 +3,7 @@ import 'package:flutter_supabase_independent_music_streaming/screens/playlist/Pl
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../models/Playlist.dart';
+import '../../models/Song.dart';
 import '../../widgets/CustomDrawer.dart';
 
 class PlaylistScreen extends StatefulWidget {
@@ -16,37 +17,42 @@ class PlaylistScreen extends StatefulWidget {
 
 class _PlaylistScreenState extends State<PlaylistScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
-
   String? userId;
+
+  Future<List<Playlist>>? _playlistsFuture;
 
   @override
   void initState() {
     super.initState();
+    userId = supabase.auth.currentUser?.id;
+    _loadPlaylists();
+  }
 
-    // print(supabase.auth.currentUser?.id);
+  void _loadPlaylists() {
     setState(() {
-      userId = supabase.auth.currentUser?.id;
+      _playlistsFuture = _fetchPlaylists();
     });
   }
 
-  /// Stream to listen to real-time changes in the `playlists` table.
-  Stream<List<Playlist>> playlistStream() {
+  /// Fetch playlists from Supabase
+  Future<List<Playlist>> _fetchPlaylists() async {
+    if (userId == null) return [];
 
-
-    return supabase
+    final response = await supabase
         .from('playlists')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', userId as Object) // Filter playlists where user_id matches
-        // .map((data) => data.map((playlist) => Playlist.fromJson(playlist)).toList());
-        .map((data) {
-          print('Raw data from Supabase: $data'); // Print raw response
-          final playlists = data.map((playlist) => Playlist.fromJson(playlist)).toList();
-          print('Parsed playlists: $playlists'); // Print parsed Playlist objects
-          return playlists;
-        });
+        .select('*, playlist_songs(*, songs(*, artist:users(*)))') // Fetch playlists with their songs
+        .eq('user_id', userId as Object);
+
+    print(response.toString());
+
+    if (response is List) {
+      return response.map((data) => Playlist.fromJson(data)).toList();
+    } else {
+      return [];
+    }
   }
 
-  /// Function to create a new playlist
+  /// Create a new playlist
   Future<void> _createPlaylist() async {
     final TextEditingController _nameController = TextEditingController();
 
@@ -71,22 +77,15 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
               final playlistName = _nameController.text.trim();
               if (playlistName.isEmpty || userId == null) return;
 
-              final response = await supabase.from('playlists').insert({
+              await supabase.from('playlists').insert({
                 'name': playlistName,
                 'user_id': userId,
               });
 
-              if (response != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: ${response.error!.message}')),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Playlist created successfully!')),
-                );
-                Navigator.of(context).pop();
-                setState(() {}); // Refresh the playlist list
-              }
+              Navigator.of(context).pop();
+              setState(() {
+                _playlistsFuture = _fetchPlaylists(); // Refresh playlists
+              });
             },
             child: const Text('Create'),
           ),
@@ -95,9 +94,10 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     );
   }
 
-  /// Function to edit the playlist name
+  /// Edit playlist name
   Future<void> _editPlaylistName(Playlist playlist) async {
-    final TextEditingController _nameController = TextEditingController(text: playlist.name);
+    final TextEditingController _nameController =
+    TextEditingController(text: playlist.name);
 
     await showDialog(
       context: context,
@@ -112,42 +112,23 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(), // Close dialog
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
               final newName = _nameController.text.trim();
-              if (newName.isEmpty || newName == playlist.name) {
-                Navigator.of(context).pop(); // No changes or empty name
-                return;
-              }
+              if (newName.isEmpty || newName == playlist.name) return;
 
-              try {
-                final response = await supabase
-                    .from('playlists')
-                    .update({'name': newName})
-                    .eq('user_id', userId as Object)
-                    .eq('id', playlist.id);
+              await supabase
+                  .from('playlists')
+                  .update({'name': newName})
+                  .eq('id', playlist.id);
 
-                // print(response.toString());
-                if (response == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Playlist name updated!')),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to update playlist.')),
-                  );
-                }
-
-                Navigator.of(context).pop(); // Close the dialog
-                setState(() {}); // Refresh list
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
-                );
-              }
+              Navigator.of(context).pop();
+              setState(() {
+                _playlistsFuture = _fetchPlaylists(); // Refresh playlists
+              });
             },
             child: const Text('Save'),
           ),
@@ -156,6 +137,13 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     );
   }
 
+  /// Delete playlist
+  Future<void> _deletePlaylist(int playlistId) async {
+    await supabase.from('playlists').delete().eq('id', playlistId);
+    setState(() {
+      _playlistsFuture = _fetchPlaylists(); // Refresh playlists
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,45 +153,46 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
         title: Text(widget.title),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: () {
-              setState(() {}); // Refresh the StreamBuilder by rebuilding the widget.
+              setState(() {
+                _playlistsFuture = _fetchPlaylists();
+              });
             },
           ),
         ],
       ),
-      body: StreamBuilder<List<Playlist>>(
-        stream: playlistStream(),
+      body: FutureBuilder<List<Playlist>>(
+        future: _playlistsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
 
           final playlists = snapshot.data ?? [];
 
           if (playlists.isEmpty) {
-            return const Center(
-              child: Text('No playlists available.'),
-            );
+            return const Center(child: Text('No playlists available.'));
           }
 
           return RefreshIndicator(
             onRefresh: () async {
-              setState(() {}); // Rebuilds the StreamBuilder to refresh data.
+              setState(() {
+                _playlistsFuture = _fetchPlaylists();
+              });
             },
             child: ListView.builder(
               itemCount: playlists.length,
               itemBuilder: (context, index) {
                 final playlist = playlists[index];
+
                 return Dismissible(
-                  key: Key(playlist.id.toString()), // Unique key for each item
-                  direction: DismissDirection.endToStart, // Swipe from right to left
+                  key: Key(playlist.id.toString()),
+                  direction: DismissDirection.endToStart,
                   background: Container(
                     color: Colors.red,
                     alignment: Alignment.centerRight,
@@ -215,14 +204,16 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text('Confirm Delete'),
-                        content: Text('Are you sure you want to delete "${playlist.name}"?'),
+                        content: Text(
+                            'Are you sure you want to delete "${playlist.name}"?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
                             child: const Text('Cancel'),
                           ),
                           ElevatedButton(
-                            onPressed: () => Navigator.of(context).pop(true),
+                            onPressed: () =>
+                                Navigator.of(context).pop(true),
                             child: const Text('Delete'),
                           ),
                         ],
@@ -230,34 +221,22 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                     );
                   },
                   onDismissed: (direction) async {
-                    final response = await supabase
-                        .from('playlists')
-                        .delete()
-                        .eq('id', playlist.id);
-
-                    if (response != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error: ${response.error!.message}')),
-                      );
-                    } else {
-                      setState(() {
-                        playlists.removeAt(index); // Remove from local list
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Deleted "${playlist.name}"')),
-                      );
-                    }
+                    await _deletePlaylist(playlist.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Deleted "${playlist.name}"')),
+                    );
                   },
                   child: ListTile(
                     title: Text(playlist.name),
-                    onTap: ()  {
+                    onTap: () {
 
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => PlaylistDetailScreen(title: playlist.name),
+                          builder: (context) => PlaylistDetailScreen(
+                            playlist: playlist,
+                          ),
                         ),
                       );
-
                     },
                     onLongPress: () => _editPlaylistName(playlist),
                   ),
