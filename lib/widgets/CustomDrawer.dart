@@ -38,7 +38,7 @@ class CustomDrawer extends StatelessWidget {
     await storage.delete(key: 'session');
     Navigator.pushReplacement(
       parentContext,
-      MaterialPageRoute(builder: (context) => HomeScreen(title: 'Home')),
+      MaterialPageRoute(builder: (context) => LoginScreen(title: 'Login')),
     );
   }
 
@@ -76,8 +76,8 @@ class CustomDrawer extends StatelessWidget {
                 accountName: Text(user?.userMetadata?['name'] ?? "Guest"),
                 accountEmail: Text(user?.email ?? "No Email"),
                 currentAccountPicture: CircleAvatar(
-                    child: Icon(Icons.person, size: 40)
-                  // backgroundImage: NetworkImage(user?.userMetadata?['image_path'] ?? 'https://gravatar.com/avatar/${user!.email}'),
+                    // child: Icon(Icons.person, size: 40)
+                  backgroundImage: NetworkImage(user?.userMetadata?['image_path'] ?? 'https://gravatar.com/avatar/${user!.email}'),
                 ),
                 decoration: BoxDecoration(
                   color: theme.primaryColor, // Themed background color
@@ -122,17 +122,32 @@ class CustomDrawer extends StatelessWidget {
                     Navigator.push(parentContext, MaterialPageRoute(builder: (context) => AritstManagementScreen(title: 'Aritst Management')));
                   },
                 ),
-                // ListTile(
-                //   leading: Icon(Icons.settings),
-                //   title: Text('Customers Management'),
-                //   onTap: () {
-                //     Navigator.pop(context);
-                //     Navigator.push(
-                //         parentContext,
-                //         MaterialPageRoute(builder: (context) => CustomerManagementScreen(title: 'Customers Management'))
-                //     );
-                //   },
-                // ),
+                ListTile(
+                  leading: Icon(Icons.account_circle),
+                  title: Text('Profile'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(
+                        builder: (context) => ProfileScreen(title: 'Profile'),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(
+                        builder: (context) => SettingScreen(title: 'Settings'),
+                      ),
+                    );
+                  },
+                ),
 
               ] else if (role == 'customer') ...[
                 ListTile(
@@ -250,6 +265,7 @@ class CustomDrawer extends StatelessWidget {
                     );
                   },
                 ),
+
               ],
 
               // Logout option for authenticated users
