@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_supabase_independent_music_streaming/screens/HomeScreen.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -22,6 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
 
   final storage = FlutterSecureStorage(); // Secure storage instance
   final supabase = Supabase.instance.client;
@@ -36,9 +39,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     'Artist': 'customer'
   };
 
-  String selectedRoleKey = 'Customer'; // Default role
+  String selectedRoleKey = 'Artist'; // Default role
 
   @override
+  void initState() {
+    super.initState();
+
+    _getCurrentLocation();
+  }
+
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
@@ -50,6 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         data: {
           'name': nameController.text.trim(),
           'phone': phoneController.text.trim(),
+          'address': addressController.text.trim(),
         },
       );
 
@@ -123,6 +133,90 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  // Location Address
+  String _location = "Press the button to get location";
+
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      _isLoading = true;
+      _location = "Fetching location...";
+    });
+
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _location = "Location services are disabled.";
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Check and request location permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _location = "Location permissions are denied.";
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _location =
+          "Location permissions are permanently denied. Please enable them in settings.";
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Get the current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Get address from coordinates
+      await _getAddressFromLatLng(position);
+    } catch (e) {
+      setState(() {
+        _location = "Error: $e";
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getAddressFromLatLng(Position position) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        setState(() {
+          _location =
+          "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+        });
+      } else {
+        setState(() {
+          _location = "No address available for this location.";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _location = "Failed to get address: $e";
+      });
+    } finally {
+      _isLoading = false;
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -171,6 +265,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 validator: (value) => value!.length < 6 ? 'Password must be at least 6 characters' : null,
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                controller: addressController,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                    labelText: 'Address',
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.gps_fixed),
+                      onPressed: () {
+                        setState(() {
+                          addressController.text = _location;
+                        });
+                      },
+                    )
+                ),
+                validator: (value) => value!.isEmpty ? 'Enter a valid Address' : null,
               ),
               SizedBox(height: 10),
               DropdownButtonFormField<String>(
