@@ -91,6 +91,24 @@ class _SongFilterByBrandScreenState extends State<SongFilterByBrandScreen> {
                 final song = songs[index];
                 return ListTile(
                   title: Text(song.name),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.play_arrow),
+                    onPressed: () {
+
+                      print(song.id.toString());
+                      print(song.name.toString());
+                      print(song.image_path.toString());
+                      print(song.song_path.toString());
+                      print(song.artist?.name.toString());
+
+                      // Play song logic here
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => MusicPlayerScreen(song: song),
+                        ),
+                      );
+                    },
+                  ),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
