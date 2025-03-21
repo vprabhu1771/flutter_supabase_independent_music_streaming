@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/Brand.dart';
 import '../models/Genre.dart';
@@ -19,11 +20,13 @@ class _UploadScreenState extends State<UploadScreen> {
   final TextEditingController _songNameController = TextEditingController();
   bool isUploading = false;
   String? uploadedFileUrl;
+  String? uploadedImageUrl;
   String? userId;
   List<Genre> genres = [];
   List<Brand> brands = [];
   Genre? selectedGenre;
   Brand? selectedBrand;
+  File? coverImageFile;
 
   @override
   void initState() {
@@ -47,11 +50,36 @@ class _UploadScreenState extends State<UploadScreen> {
     });
   }
 
+  Future<void> pickCoverImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        coverImageFile = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<String?> uploadCoverImage(File imageFile) async {
+    try {
+      final fileName = "${DateTime.now().millisecondsSinceEpoch}.jpg";
+      final response = await supabase.storage.from('assets').upload('covers/$fileName', imageFile);
+      if (response == null) {
+        throw response;
+      }
+      return supabase.storage.from('assets').getPublicUrl('covers/$fileName');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Image Upload Failed: $e')),
+      );
+      return null;
+    }
+  }
+
   Future<void> uploadSong() async {
     if (!_formKey.currentState!.validate()) return;
-    if (selectedGenre == null || selectedBrand == null) {
+    if (selectedGenre == null || selectedBrand == null || coverImageFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select both genre and brand.')),
+        const SnackBar(content: Text('Please select genre, brand, and upload a cover image.')),
       );
       return;
     }
@@ -70,6 +98,10 @@ class _UploadScreenState extends State<UploadScreen> {
 
       setState(() => isUploading = true);
 
+      // Upload Cover Image First
+      final coverUrl = await uploadCoverImage(coverImageFile!);
+      if (coverUrl == null) throw Exception('Failed to upload cover image');
+
       final response = await supabase.storage.from('assets').upload('songs/$fileName', file);
       if (response == null) {
         throw response;
@@ -80,11 +112,12 @@ class _UploadScreenState extends State<UploadScreen> {
       setState(() {
         isUploading = false;
         uploadedFileUrl = publicUrl;
+        uploadedImageUrl = coverUrl;
       });
 
       await supabase.from('songs').insert({
         'name': songName,
-        'image_path': publicUrl,
+        'image_path': coverUrl,
         'song_path': publicUrl,
         'genre_id': selectedGenre!.id,
         'brand_id': selectedBrand!.id,
@@ -100,6 +133,7 @@ class _UploadScreenState extends State<UploadScreen> {
       setState(() {
         selectedGenre = null;
         selectedBrand = null;
+        coverImageFile = null;
       });
     } catch (e) {
       setState(() => isUploading = false);
@@ -155,6 +189,21 @@ class _UploadScreenState extends State<UploadScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Select Brand',
                   border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: pickCoverImage,
+                child: Container(
+                  width: double.infinity,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: coverImageFile == null
+                      ? const Center(child: Text('Tap to select cover image'))
+                      : Image.file(coverImageFile!, fit: BoxFit.cover),
                 ),
               ),
               const SizedBox(height: 16),
