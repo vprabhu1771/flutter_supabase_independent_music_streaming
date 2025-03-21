@@ -7,6 +7,7 @@ import '../HomeScreen.dart';
 
 import '../auth/EditProfileScreen.dart';
 import 'EditProfilePicScreen.dart';
+import 'LoginScreen.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -42,8 +43,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        // builder: (context) => LoginScreen(title: 'Login'),
-        builder: (context) => HomeScreen(title: 'Home'),
+        builder: (context) => LoginScreen(title: 'Login'),
+        // builder: (context) => HomeScreen(title: 'Home'),
       ),
     );
   }
@@ -161,14 +162,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const Divider(),
 
-              // ListTile(
-              //   leading: Icon(Icons.location_on),
-              //   title: Text('New York, USA'), // Replace with dynamic address
-              //   onTap: () {
-              //     // Handle address action
-              //   },
-              // ),
-              // const Divider(),
+              ListTile(
+                leading: Icon(Icons.location_on),
+                title: Text(user?.userMetadata?['address'] ?? 'New York, USA'), // Replace with dynamic address
+                onTap: () {
+                  // Handle address action
+                },
+              ),
+              const Divider(),
 
               // Logout Button (Red color)
               TextButton(
