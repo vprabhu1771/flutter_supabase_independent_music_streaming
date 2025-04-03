@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/Song.dart';
@@ -6,7 +7,6 @@ import '../screens/song/MusicPlayerScreen.dart';
 import '../widgets/CustomDrawer.dart';
 
 class SongManagementScreen extends StatefulWidget {
-
   final String title;
 
   const SongManagementScreen({super.key, required this.title});
@@ -16,7 +16,6 @@ class SongManagementScreen extends StatefulWidget {
 }
 
 class _SongManagementScreenState extends State<SongManagementScreen> {
-
   final SupabaseClient supabase = Supabase.instance.client;
 
   /// Fetches the list of songs along with user details.
@@ -30,6 +29,12 @@ class _SongManagementScreenState extends State<SongManagementScreen> {
     print("Parsed Songs List: $songs");
 
     return songs;
+  }
+
+  /// Deletes a song from Supabase
+  Future<void> deleteSong(int songId) async {
+    await supabase.from('songs').delete().eq('id', songId);
+    setState(() {}); // Refresh UI
   }
 
   @override
@@ -48,7 +53,7 @@ class _SongManagementScreenState extends State<SongManagementScreen> {
         ],
       ),
       body: FutureBuilder<List<Song>>(
-        future: fetchSongs(), // Calls fetchSongs() only once
+        future: fetchSongs(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -68,22 +73,38 @@ class _SongManagementScreenState extends State<SongManagementScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              setState(() {}); // Triggers UI rebuild
+              setState(() {}); // Refreshes list
             },
             child: ListView.builder(
               itemCount: songs.length,
               itemBuilder: (context, index) {
                 final song = songs[index];
-                return ListTile(
-                  title: Text("${song.name}" ),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => MusicPlayerScreen(song: song),
+
+                return Slidable(
+                  key: ValueKey(song.id),
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) => deleteSong(song.id),
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
                       ),
-                    );
-                    print('Selected song: ${song.name} with ID: ${song.id}');
-                  },
+                    ],
+                  ),
+                  child: ListTile(
+                    title: Text(song.name),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => MusicPlayerScreen(song: song),
+                        ),
+                      );
+                      print('Selected song: ${song.name} with ID: ${song.id}');
+                    },
+                  ),
                 );
               },
             ),
