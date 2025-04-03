@@ -20,6 +20,7 @@ import '../screens/HomeScreen.dart';
 
 import '../screens/SettingScreen.dart';
 
+import '../screens/SupportUsScreen.dart';
 import '../screens/auth/LoginScreen.dart';
 import '../screens/auth/ProfileScreen.dart';
 import '../screens/auth/RegisterScreen.dart';
@@ -261,6 +262,19 @@ class CustomDrawer extends StatelessWidget {
                       parentContext,
                       MaterialPageRoute(
                         builder: (context) => SettingScreen(title: 'Settings'),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('Contact Us'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      parentContext,
+                      MaterialPageRoute(
+                        builder: (context) => SupportUsScreen(title: 'Contact Us'),
                       ),
                     );
                   },
