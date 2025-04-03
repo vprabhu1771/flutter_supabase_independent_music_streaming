@@ -22,25 +22,25 @@ class UiProvider extends ChangeNotifier{
       primaryColorDark: Colors.white
   );
 
-  final blueTheme = ThemeData(
-    primaryColor: Color(0xFF0067A1), // Hex #2196F3 (Blue),
+  final orangeTheme = ThemeData(
+    primaryColor: Color(0xFFFC774D), // Hex #2196F3 (Blue),
     brightness: Brightness.light,
     primaryColorDark: Colors.pinkAccent,
     // drawerTheme: DrawerThemeData(
-    //   backgroundColor: Color(0xFF0067A1), // Blue drawer background
+    //   backgroundColor: Color(0xFFFC774D), // Blue drawer background
     //   scrimColor: Colors.black54, // Overlay color
     // ),
 
     // AppBar Theme
     appBarTheme: AppBarTheme(
-      backgroundColor: Color(0xFF0067A1), // Pink AppBar
+      backgroundColor: Color(0xFFFC774D), // Pink AppBar
       titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
       iconTheme: IconThemeData(color: Colors.white), // AppBar icons color
     ),
 
     // Button Theme
     buttonTheme: ButtonThemeData(
-      buttonColor: Color(0xFF0067A1), // Default button color
+      buttonColor: Color(0xFFFC774D), // Default button color
       textTheme: ButtonTextTheme.primary,
     ),
 
@@ -48,7 +48,7 @@ class UiProvider extends ChangeNotifier{
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white, // Button text color
-        backgroundColor: Color(0xFF0067A1), // Button background color
+        backgroundColor: Color(0xFFFC774D), // Button background color
       ),
     ),
 
@@ -56,16 +56,16 @@ class UiProvider extends ChangeNotifier{
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         // backgroundColor: Colors.pink, // TextButton color
-        foregroundColor: Color(0xFF0067A1), // TextButton color
+        foregroundColor: Color(0xFFFC774D), // TextButton color
       ),
     ),
 
     // Bottom Navigation Bar Theme
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: Color(0xFF0067A1), // Background color
+      backgroundColor: Color(0xFFFC774D), // Background color
       selectedItemColor: Colors.white, // Selected icon & text color
       unselectedItemColor: Colors.white70, // Unselected icon & text color
-      selectedLabelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, backgroundColor: Color(0xFF0067A1)), // Selected text style
+      selectedLabelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, backgroundColor: Color(0xFFFC774D)), // Selected text style
       unselectedLabelStyle: TextStyle(fontSize: 12), // Unselected text style
     ),
 

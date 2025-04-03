@@ -60,7 +60,7 @@ class CustomDrawer extends StatelessWidget {
     final user = supabase.auth.currentUser;
 
     final themeProvider = Provider.of<UiProvider>(context);
-    final theme = themeProvider.isDark ? themeProvider.darkTheme : themeProvider.blueTheme;
+    final theme = themeProvider.isDark ? themeProvider.darkTheme : themeProvider.orangeTheme;
 
 
     return Drawer(

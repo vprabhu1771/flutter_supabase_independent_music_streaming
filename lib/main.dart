@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
 
             theme: notifier.isDark
                 ? notifier.darkTheme // dark theme applied
-                : notifier.blueTheme, // pink theme applied when not dark
+                : notifier.orangeTheme, // pink theme applied when not dark
 
             home: LoginScreen(title: 'Login'),
 
