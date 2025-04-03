@@ -1,3 +1,4 @@
+import 'package:just_audio/just_audio.dart';
 import 'Artist.dart';
 
 class Song {
@@ -6,6 +7,7 @@ class Song {
   final String image_path;
   final String song_path;
   final Artist? artist;
+  Duration? duration; // Add duration field
 
   Song({
     required this.id,
@@ -13,6 +15,7 @@ class Song {
     required this.image_path,
     required this.song_path,
     this.artist, // Nullable artist
+    this.duration, // Optional duration
   });
 
   factory Song.fromJson(Map<String, dynamic> json) {
@@ -33,5 +36,18 @@ class Song {
       'song_path': song_path,
       'artist': artist?.toJson(), // Include artist if not null
     };
+  }
+
+  /// Fetch song duration using `just_audio`
+  Future<Duration?> fetchDuration() async {
+    try {
+      final player = AudioPlayer();
+      final duration = await player.setUrl(song_path);
+      await player.dispose(); // Dispose player after fetching duration
+      return duration;
+    } catch (e) {
+      print("Error fetching duration: $e");
+      return null;
+    }
   }
 }
