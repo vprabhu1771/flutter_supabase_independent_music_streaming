@@ -10,3 +10,6 @@ CREATE TABLE songs (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+```sql
+ALTER TABLE songs ADD COLUMN duration INTERVAL;
+```
