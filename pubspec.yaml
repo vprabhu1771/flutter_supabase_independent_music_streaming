@@ -58,6 +58,7 @@ dependencies:
   location: ^5.0.3
   geolocator: ^11.0.0 # Use the latest version
   geocoding: ^3.0.0
+  font_awesome_flutter: ^10.8.0
 
 dev_dependencies:
   flutter_test:
