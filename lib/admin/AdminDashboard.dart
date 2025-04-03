@@ -135,8 +135,25 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return ListTile(
       leading: const FaIcon(FontAwesomeIcons.music, color: Colors.blue), // FontAwesome icon
       title: Text(song.name, style: const TextStyle(fontWeight: FontWeight.bold)), // Song Name
-      subtitle: Text(song.name ?? "Unknown Artist"), // Artist Name
-      // trailing: Text(song ?? "N/A", style: const TextStyle(color: Colors.grey)), // Duration
+      subtitle: Text(song.artist?.name ?? "Unknown Artist"), // Artist Name
+
+      // **Fetch and Display Song Duration**
+      trailing: FutureBuilder<Duration?>(
+        future: song.fetchDuration(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2));
+          }
+          if (snapshot.hasError || snapshot.data == null) {
+            return const Text("N/A", style: TextStyle(color: Colors.grey));
+          }
+          final duration = snapshot.data!;
+          final minutes = duration.inMinutes;
+          final seconds = duration.inSeconds.remainder(60);
+          return Text("$minutes:${seconds.toString().padLeft(2, '0')}", style: const TextStyle(color: Colors.grey));
+        },
+      ),
+
       onTap: () {
         // Navigate to Music Player Screen
         Navigator.of(context).push(
@@ -145,4 +162,5 @@ class _AdminDashboardState extends State<AdminDashboard> {
       },
     );
   }
+
 }
