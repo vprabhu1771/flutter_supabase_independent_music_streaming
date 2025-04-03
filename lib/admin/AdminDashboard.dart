@@ -18,6 +18,28 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   final SupabaseClient supabase = Supabase.instance.client;
 
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchUserCount();
+
+    fetchSongCount();
+  }
+
+  /// Fetch total number of users
+  Future<int> fetchUserCount() async {
+    final response = await supabase.from('users').select('*');
+    return response.length ?? 0;
+  }
+
+  /// Fetch total number of songs
+  Future<int> fetchSongCount() async {
+    final response = await supabase.from('songs').select('*');
+    return response.length ?? 0;
+  }
+
   /// Fetch Songs from Supabase
   Future<List<Song>> fetchSongs() async {
     final response = await supabase.from('songs')
@@ -58,9 +80,32 @@ class _AdminDashboardState extends State<AdminDashboard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildStatCard("Users", "1.2K", FontAwesomeIcons.userGroup, Colors.blue),
-                _buildStatCard("Songs", "5.6K", FontAwesomeIcons.music, Colors.orange),
-                _buildStatCard("Artists", "280", FontAwesomeIcons.microphone, Colors.green),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    FutureBuilder<int>(
+                      future: fetchUserCount(),
+                      builder: (context, snapshot) {
+                        return _buildStatCard("Users", snapshot.data?.toString() ?? "0", FontAwesomeIcons.userGroup, Colors.blue);
+                      },
+                    ),
+                    FutureBuilder<int>(
+                      future: fetchSongCount(),
+                      builder: (context, snapshot) {
+                        return _buildStatCard("Songs", snapshot.data?.toString() ?? "0", FontAwesomeIcons.music, Colors.orange);
+                      },
+                    ),
+                    FutureBuilder<int>(
+                      future: fetchUserCount(),
+                      builder: (context, snapshot) {
+                        return _buildStatCard("Artists", snapshot.data?.toString() ?? "0", FontAwesomeIcons.microphone, Colors.green);
+                      },
+                    ),
+                  ],
+                ),
+                // _buildStatCard("Users", "1.2K", FontAwesomeIcons.userGroup, Colors.blue),
+                // _buildStatCard("Songs", "5.6K", FontAwesomeIcons.music, Colors.orange),
+                // _buildStatCard("Artists", "280", FontAwesomeIcons.microphone, Colors.green),
                 // _buildStatCard("Albums", "120", FontAwesomeIcons.recordVinyl, Colors.purple),
               ],
             ),
@@ -114,7 +159,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
-        width: 80,
+        width: 100,
         height: 120,
         padding: const EdgeInsets.all(12),
         child: Column(
