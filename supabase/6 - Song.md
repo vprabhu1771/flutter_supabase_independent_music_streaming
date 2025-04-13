@@ -6,6 +6,8 @@ CREATE TABLE songs (
     image_path VARCHAR(100) DEFAULT 'default_image.png',
     song_path VARCHAR(100) DEFAULT 'default_image.png',
     user_id uuid NULL,
+    genre_id INT NULL,
+    brand_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
